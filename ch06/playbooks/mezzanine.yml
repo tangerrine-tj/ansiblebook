@@ -15,13 +15,16 @@
     domains:
       - 192.168.33.10.xip.io
       - www.192.168.33.10.xip.io
-    repo_url: git@github.com:ansiblebook/mezzanine_example.git
+    repo_url: git@github.com:tangerrine-tj/mezzanine_example.git
     locale: en_US.UTF-8
     # Variables below don't appear in Mezannine's fabfile.py
     # but I've added them for convenience
     conf_path: /etc/nginx/conf
     tls_enabled: True
     python: "{{ venv_path }}/bin/python"
+    # GFW will block pip installation from the website overseas
+    # substitude the pypi source with the one in aliyun
+    pip_args: "--index-url https://mirrors.aliyun.com/pypi/simple"
     database_name: "{{ proj_name }}"
     database_user: "{{ proj_name }}"
     database_host: localhost
@@ -31,6 +34,12 @@
   vars_files:
     - secrets.yml
   tasks:
+    - name: update apt source list
+      become: True
+      replace:
+        path: /etc/apt/sources.list
+        regexp: 'archive.ubuntu.com'
+        replace: 'mirrors.aliyun.com'
     - name: install apt packages
       apt: pkg={{ item }} update_cache=yes cache_valid_time=3600
       become: True
@@ -56,7 +65,7 @@
     - name: check out the repository on the host
       git: repo={{ repo_url }} dest={{ proj_path }} accept_hostkey=yes
     - name: install Python requirements globally via pip
-      pip: name={{ item }} state=latest
+      pip: name={{ item }} state=latest extra_args={{ pip_args }}
       with_items:
         - pip
         - virtualenv
@@ -119,7 +128,7 @@
     - name: generate the settings file
       template: src=templates/local_settings.py.j2 dest={{ settings_path }}/local_settings.py
     - name: install requirements.txt
-      pip: requirements={{ proj_path }}/{{ reqs_path }} virtualenv={{ venv_path }}
+      pip: requirements={{ proj_path }}/{{ reqs_path }} virtualenv={{ venv_path }} extra_args={{ pip_args }}
     - name: install required python packages
       pip: name={{ item }} virtualenv={{ venv_path }}
       with_items:
