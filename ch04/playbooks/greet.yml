@@ -1,6 +1,7 @@
 ---
 - name: pass a message on the command line
   hosts: localhost
+  gather_facts: False
   vars:
     greeting: "you didn't specify a message"
   tasks:

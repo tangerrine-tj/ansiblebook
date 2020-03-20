@@ -1,0 +1,20 @@
+---
+
+- name: print ansible_local
+  hosts: server1
+  gather_facts: True
+  become: True
+  tasks:
+    - name: create facts.d directory
+      file:
+        path: /etc/ansible/facts.d
+        state: directory
+        mode: 0755
+    - name: copy local fact file to remote
+      copy:
+        src: files/example.fact
+        dest: /etc/ansible/facts.d/example.fact
+    - name: print ansible_local
+      debug: var=ansible_local
+    - name: print book title
+      debug: msg="The title of the book is {{ ansible_local.example.book.title }}"
