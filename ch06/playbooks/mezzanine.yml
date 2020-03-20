@@ -22,7 +22,9 @@
     conf_path: /etc/nginx/conf
     tls_enabled: True
     python: "{{ venv_path }}/bin/python"
-    pip_args: "--index-url https://mirrors.aliyun.com/pypi/simple"
+    # GFW will block pip installation from the website overseas
+    # substitude the pypi source with the one in tsinghua tuna
+    pip_args: "--index-url https://pypi.tuna.tsinghua.edu.cn/simple"
     database_name: "{{ proj_name }}"
     database_user: "{{ proj_name }}"
     database_host: localhost
